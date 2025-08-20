@@ -2,11 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const connectDB = require('./config/db');
 const cors = require('cors');
+const app = express();
 
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
-const app = express();
+const tourRoutes = require('./routes/tours');
+app.use('/api/tours', tourRoutes);
 
 // Connect to database
 connectDB();
