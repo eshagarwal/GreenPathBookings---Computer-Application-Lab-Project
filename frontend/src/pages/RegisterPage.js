@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box } from '@mui/material';
+import { Container, TextField, Button, Typography, Box, Paper, Stack } from '@mui/material';
 import { register } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ const RegisterPage = () => {
     address: '',
   });
 
+  const navigate = useNavigate();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -49,36 +51,93 @@ const RegisterPage = () => {
     }
   };
 
-  return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 5 }}>
-        <Typography variant="h4" gutterBottom>Register</Typography>
-        {error && <Typography color="error">{error}</Typography>}
-        {success && <Typography color="primary">{success}</Typography>}
-        <form onSubmit={handleSubmit}>
-          <TextField fullWidth label="Username" name="username"
-            value={formData.username} onChange={handleChange} margin="normal" required />
+// Similar imports and setup as your current RegisterPage
 
-          <TextField fullWidth label="Email" name="email" type="email"
-            value={formData.email} onChange={handleChange} margin="normal" required />
+return (
+  <Container maxWidth="sm" sx={{ mt: 8 }}>
+    <Paper elevation={4} variant="elevation" sx={{ p: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Register
+      </Typography>
+      {error && (
+        <Typography color="error" mb={2}>
+          {error}
+        </Typography>
+      )}
+      {success && (
+        <Typography color="primary" mb={2}>
+          {success}
+        </Typography>
+      )}
+      <form onSubmit={handleSubmit}>
+          <TextField 
+            fullWidth 
+            label="Username" 
+            name="username"
+            value={formData.username} 
+            onChange={handleChange} 
+            sx={{ mb: 2 }} 
+            required />
 
-          <TextField fullWidth label="Password" name="password" type="password"
-            value={formData.password} onChange={handleChange} margin="normal" required />
+          <TextField 
+            fullWidth 
+            label="Email" 
+            name="email" 
+            type="email"
+            value={formData.email} 
+            onChange={handleChange} 
+            sx={{ mb: 2 }} 
+            required />
 
-          <TextField fullWidth label="Full Name" name="fullName" value={formData.fullName}
-            onChange={handleChange} margin="normal" />
+          <TextField 
+            fullWidth 
+            label="Password" 
+            name="password" 
+            type="password"
+            value={formData.password} 
+            onChange={handleChange} 
+            sx={{ mb: 2 }} 
+            required />
 
-          <TextField fullWidth label="Phone" name="phone"
-            value={formData.phone} onChange={handleChange} margin="normal" />
+          <TextField 
+            fullWidth 
+            label="Full Name" 
+            name="fullName" 
+            value={formData.fullName}
+            onChange={handleChange} 
+            sx={{ mb: 2 }} 
+            required />
 
-          <TextField fullWidth label="Address" name="address"
-            value={formData.address} onChange={handleChange} margin="normal" />
+          <TextField 
+            fullWidth 
+            label="Phone" 
+            name="phone"
+            value={formData.phone} 
+            onChange={handleChange} 
+            sx={{ mb: 2 }} 
+            required />
 
-          <Button variant="contained" color="primary" type="submit" sx={{ mt: 2 }}>Register</Button>
-        </form>
-      </Box>
-    </Container>
-  );
+          <TextField 
+            fullWidth 
+            label="Address" 
+            name="address"
+            value={formData.address} 
+            onChange={handleChange} 
+            sx={{ mb: 2 }}  
+            />
+
+        <Stack direction="row" justifyContent="space-between" mt={2}>
+          <Button variant="outlined" color="primary" onClick={() => navigate('/')}>
+            Go Back
+          </Button>
+          <Button variant="contained" color="primary" type="submit">
+            Register
+          </Button>
+        </Stack>
+      </form>
+    </Paper>
+  </Container>
+);
 };
 
 export default RegisterPage;
