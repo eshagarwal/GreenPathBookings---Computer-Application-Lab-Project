@@ -10,6 +10,9 @@ app.use('/api/auth', authRoutes);
 const tourRoutes = require('./routes/tours');
 app.use('/api/tours', tourRoutes);
 
+const bookingRoutes = require('./routes/bookings');
+app.use('/api/bookings', bookingRoutes);
+
 // Connect to database
 connectDB();
 
