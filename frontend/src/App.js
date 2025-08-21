@@ -4,6 +4,8 @@ import LandingPage from './pages/LandingPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import TourDetails from './pages/TourDetails';
+
 
 function App() {
   return (
@@ -13,6 +15,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/tours/:id" element={<TourDetails />} />
       </Routes>
     </Router>
   );
