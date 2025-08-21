@@ -4,6 +4,16 @@ const connectDB = require('./config/db');
 const cors = require('cors');
 const app = express();
 
+// Connect to database
+connectDB();
+
+// Middleware
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+app.use(express.json());
+
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
@@ -12,13 +22,6 @@ app.use('/api/tours', tourRoutes);
 
 const bookingRoutes = require('./routes/bookings');
 app.use('/api/bookings', bookingRoutes);
-
-// Connect to database
-connectDB();
-
-// Middleware
-app.use(cors());
-app.use(express.json());
 
 // Test route
 app.get('/', (req, res) => res.send('API Running'));
