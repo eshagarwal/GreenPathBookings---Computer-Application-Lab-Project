@@ -5,6 +5,8 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import TourDetails from './pages/TourDetails';
+import UserBookings from './pages/UserBookings';
+
 
 
 function App() {
@@ -16,6 +18,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tours/:id" element={<TourDetails />} />
+        <Route path="/bookings" element={<UserBookings />} />
+
       </Routes>
     </Router>
   );
