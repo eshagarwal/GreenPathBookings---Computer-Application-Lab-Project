@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Typography,
@@ -11,34 +11,34 @@ import {
   IconButton,
   Alert,
   Button,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import api from '../services/api';
-import { useNavigate } from 'react-router-dom';
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import api from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 const UserBookings = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const fetchBookings = async () => {
-      setError('');
-      const token = localStorage.getItem('token');
+      setError("");
+      const token = localStorage.getItem("token");
       if (!token) {
-        setError('You must be logged in to view bookings.');
+        setError("You must be logged in to view bookings.");
         setLoading(false);
         return;
       }
       try {
-        const response = await api.get('/api/bookings', {
+        const response = await api.get("/bookings/user", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBookings(response.data);
       } catch (err) {
-        setError(err.response?.data?.msg || 'Failed to load bookings');
+        setError(err.response?.data?.msg || "Failed to load bookings");
       } finally {
         setLoading(false);
       }
@@ -48,17 +48,17 @@ const UserBookings = () => {
   }, []);
 
   const handleCancel = async (bookingId) => {
-    setError('');
-    setSuccess('');
-    const token = localStorage.getItem('token');
+    setError("");
+    setSuccess("");
+    const token = localStorage.getItem("token");
     try {
       await api.delete(`/api/bookings/${bookingId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBookings((prev) => prev.filter((b) => b._id !== bookingId));
-      setSuccess('Booking cancelled successfully.');
+      setSuccess("Booking cancelled successfully.");
     } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to cancel booking');
+      setError(err.response?.data?.msg || "Failed to cancel booking");
     }
   };
 
@@ -69,7 +69,7 @@ const UserBookings = () => {
       </Typography>
 
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <CircularProgress />
         </Box>
       )}
@@ -92,28 +92,34 @@ const UserBookings = () => {
 
       {!loading && bookings.length > 0 && (
         <List>
-          {bookings.map((booking) => (
-            <ListItem
-              key={booking._id}
-              divider
-              button
-              onClick={() => navigate(`/tours/${booking.tour._id}`)}
-            >
-              <ListItemText
-                primary={booking.tour.title}
-                secondary={`Date: ${new Date(booking.tour.startDate).toLocaleDateString()} - Participants: ${booking.participants}`}
-              />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="cancel"
-                  onClick={() => handleCancel(booking._id)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          ))}
+          {bookings
+            .filter((b) => b.tourId !== null)
+            .map((booking) => (
+              <ListItem
+                key={booking._id}
+                divider
+                button
+                onClick={() => navigate(`/tours/${booking.tour._id}`)}
+              >
+                <ListItemText
+                  primary={booking.tour?.title}
+                  secondary={`Date: ${new Date(
+                    booking.tour?.startDate
+                  ).toLocaleDateString()} - Participants: ${
+                    booking.participants
+                  }`}
+                />
+                <ListItemSecondaryAction>
+                  <IconButton
+                    edge="end"
+                    aria-label="cancel"
+                    onClick={() => handleCancel(booking._id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
         </List>
       )}
     </Container>
