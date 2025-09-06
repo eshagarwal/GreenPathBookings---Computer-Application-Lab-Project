@@ -109,22 +109,41 @@ const TourDetails = () => {
           <Typography variant="body1" paragraph>
             {tour.description}
           </Typography>
+
           <Typography variant="h6" gutterBottom>
             Price: ${tour.price}
           </Typography>
 
-          <Box sx={{ mt: 3, mb: 2 }}>
-            <TextField
-              label="Number of Participants"
-              type="number"
-              value={participants}
-              onChange={(e) =>
-                setParticipants(Math.max(1, Number(e.target.value)))
-              }
-              inputProps={{ min: 1 }}
-              sx={{ width: 200 }}
-            />
-          </Box>
+          {/* Add these sustainability and itinerary sections here */}
+
+          <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+            Sustainability Commitment
+          </Typography>
+          <Typography variant="body1" paragraph>
+            This tour operates with a commitment to minimizing environmental
+            impact. We use solar-powered accommodations, support local
+            communities, and offset carbon emissions for all travel.
+          </Typography>
+
+          <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+            Itinerary Highlights
+          </Typography>
+          <ul>
+            {tour.itinerary?.map((day, idx) => (
+              <li key={idx}>
+                <Typography variant="body2">{day}</Typography>
+              </li>
+            ))}
+          </ul>
+
+          <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+            Traveler Guidelines
+          </Typography>
+          <Typography variant="body2" paragraph>
+            Please bring reusable water bottles and avoid single-use plastics.
+            Respect the local environment and wildlife by following guide
+            instructions carefully.
+          </Typography>
 
           {bookingError && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -141,7 +160,7 @@ const TourDetails = () => {
             variant="contained"
             color="primary"
             sx={{ mt: 3 }}
-            onClick={() => navigate(`/book/${tour._id}`)} // navigate to booking form page
+            onClick={() => navigate(`/book/${tour._id}`)}
           >
             Book This Tour
           </Button>
