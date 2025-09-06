@@ -122,11 +122,30 @@ const Dashboard = () => {
 
   return (
     <>
-      <AppBar position="static" color="primary" enableColorOnDark>
-        <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Typography variant="h6" component="div">
-            GreenPath Bookings
-          </Typography>
+      <AppBar
+        position="static"
+        sx={{
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography
+              variant="h5"
+              component="div"
+              sx={{
+                fontWeight: "bold",
+                background: "linear-gradient(45deg, #ffffff 30%, #f0f8ff 90%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                textShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              }}
+            >
+              🌿 GreenPath Bookings
+            </Typography>
+          </Box>
           <UserMenu user={user} />
         </Toolbar>
       </AppBar>
@@ -136,13 +155,14 @@ const Dashboard = () => {
         sx={{
           mb: 4,
           p: 4,
-          bgcolor: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          // bgcolor: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           color: "white",
           textAlign: "center",
           borderRadius: 2,
           mx: 2,
           mt: 2,
+          boxShadow: "0 8px 32px rgba(102, 126, 234, 0.3)",
         }}
       >
         <Typography variant="h4" gutterBottom fontWeight="bold">
@@ -169,6 +189,11 @@ const Dashboard = () => {
                     </InputAdornment>
                   ),
                 }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} md={3}>
@@ -178,6 +203,9 @@ const Dashboard = () => {
                   value={sortBy}
                   label="Sort By"
                   onChange={(e) => setSortBy(e.target.value)}
+                  sx={{
+                    borderRadius: 2,
+                  }}
                 >
                   <MenuItem value="popularity">Popularity</MenuItem>
                   <MenuItem value="price-low">Price: Low to High</MenuItem>
@@ -193,6 +221,14 @@ const Dashboard = () => {
                 variant="outlined"
                 startIcon={<FilterList />}
                 onClick={() => setShowFilters(!showFilters)}
+                sx={{
+                  borderRadius: 2,
+                  borderWidth: 2,
+                  "&:hover": {
+                    borderWidth: 2,
+                    background: "rgba(102, 126, 234, 0.08)",
+                  },
+                }}
               >
                 Filters
               </Button>
@@ -212,6 +248,13 @@ const Dashboard = () => {
                     min={0}
                     max={5000}
                     valueLabelFormat={(value) => `$${value}`}
+                    sx={{
+                      color: "#667eea",
+                      "& .MuiSlider-thumb": {
+                        background:
+                          "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      },
+                    }}
                   />
                   <Box
                     sx={{ display: "flex", justifyContent: "space-between" }}
