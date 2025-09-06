@@ -4,6 +4,7 @@ import {
   Typography,
   Grid,
   Card,
+  CardActions,
   CardContent,
   CardMedia,
   Button,
@@ -14,7 +15,7 @@ import {
 } from "@mui/material";
 import api from "../services/api";
 import UserMenu from "../components/UserMenu";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [tours, setTours] = useState([]);
@@ -79,22 +80,26 @@ const Dashboard = () => {
           {!loading &&
             !error &&
             tours.map((tour) => (
-              <Grid item xs={12} sm={6} md={4} key={tour._id}>
-                <Card sx={{ backgroundColor: "#DDF6D2", boxShadow: 3 }}>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={4} // 3 columns on md and up
+                key={tour._id}
+              >
+                <Card sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
                   {tour.images && tour.images.length > 0 && (
                     <CardMedia
-                      component="img"
-                      height="200"
+                      sx={{ height: 140 }}
                       image={tour.images[0]}
-                      alt={tour.title}
+                      title={tour.title}
                     />
                   )}
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
+                  <CardContent sx={{ flexGrow: 1 }} >
+                    <Typography gutterBottom variant="h5" component="div">
                       {tour.title}
                     </Typography>
-
-                    {/* Promotional Badge */}
+                    {/* On Sale Badge */}
                     {tour.promotions?.includes("On Sale") && (
                       <Box
                         sx={{
@@ -112,29 +117,31 @@ const Dashboard = () => {
                         On Sale
                       </Box>
                     )}
-
                     <Typography variant="body2" color="text.secondary" noWrap>
                       {tour.description}
                     </Typography>
-
                     <Typography variant="subtitle2" sx={{ mt: 1 }}>
                       Location: {tour.location}
                     </Typography>
-
                     <Typography variant="subtitle2">
                       Price: ${tour.price}
                     </Typography>
-
+                  </CardContent>
+                  <CardActions>
                     <Button
                       size="small"
-                      sx={{ mt: 2 }}
-                      variant="contained"
-                      color="primary"
                       onClick={() => navigate(`/tours/${tour._id}`)}
                     >
                       View Details
                     </Button>
-                  </CardContent>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => navigate(`/book/${tour._id}`)}
+                    >
+                      Book This Tour
+                    </Button>
+                  </CardActions>
                 </Card>
               </Grid>
             ))}
