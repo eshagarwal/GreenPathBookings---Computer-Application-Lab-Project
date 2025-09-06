@@ -247,7 +247,7 @@ const Dashboard = () => {
           {!loading &&
             !error &&
             filteredTours.map((tour) => (
-              <Grid item xs={12} sm={6} md={4} key={tour._id}>
+              <Grid item xs={12} sm={6} key={tour._id}>
                 <Card
                   sx={{
                     height: "100%",
@@ -263,7 +263,7 @@ const Dashboard = () => {
                   <Box sx={{ position: "relative" }}>
                     {tour.images && tour.images.length > 0 && (
                       <CardMedia
-                        sx={{ height: 200 }}
+                        sx={{ height: 220 }}
                         image={tour.images[0]}
                         title={tour.title}
                       />
@@ -309,12 +309,20 @@ const Dashboard = () => {
                     </Box>
                   </Box>
 
-                  <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+                  <CardContent sx={{ flexGrow: 1, p: 2 }}>
                     <Typography
                       gutterBottom
                       variant="h6"
                       component="div"
                       fontWeight="bold"
+                      sx={{
+                        minHeight: "64px",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        lineHeight: 1.3,
+                      }}
                     >
                       {tour.title}
                     </Typography>
@@ -339,16 +347,29 @@ const Dashboard = () => {
                     <Typography
                       variant="body2"
                       color="text.secondary"
-                      sx={{ mb: 2 }}
+                      sx={{
+                        mb: 2,
+                        minHeight: "60px",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
                     >
-                      {tour.description?.length > 100
-                        ? `${tour.description.substring(0, 100)}...`
+                      {tour.description?.length > 120
+                        ? `${tour.description.substring(0, 120)}...`
                         : tour.description}
                     </Typography>
 
                     {/* Tour Details */}
                     <Box
-                      sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 1,
+                        mb: 2,
+                        minHeight: "32px",
+                      }}
                     >
                       <Chip
                         icon={<LocationOn />}
@@ -379,6 +400,7 @@ const Dashboard = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
+                        mt: "auto",
                       }}
                     >
                       <Box>
@@ -394,18 +416,23 @@ const Dashboard = () => {
                         </Typography>
                       </Box>
                       {tour.availableSpots && (
-                        <Typography variant="body2" color="success.main">
+                        <Typography
+                          variant="body2"
+                          color="success.main"
+                          sx={{ fontWeight: "medium" }}
+                        >
                           {tour.availableSpots} spots left
                         </Typography>
                       )}
                     </Box>
                   </CardContent>
 
-                  <CardActions sx={{ p: 2, pt: 0 }}>
+                  <CardActions sx={{ p: 2, pt: 0, mt: "auto" }}>
                     <Button
                       size="small"
+                      variant="outlined"
                       onClick={() => navigate(`/tours/${tour._id}`)}
-                      sx={{ mr: 1 }}
+                      sx={{ mr: 1, flex: 1 }}
                     >
                       View Details
                     </Button>
@@ -413,7 +440,7 @@ const Dashboard = () => {
                       size="small"
                       variant="contained"
                       onClick={() => navigate(`/book/${tour._id}`)}
-                      sx={{ flexGrow: 1 }}
+                      sx={{ flex: 1 }}
                     >
                       Book Now
                     </Button>
