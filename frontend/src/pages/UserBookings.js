@@ -33,7 +33,7 @@ const UserBookings = () => {
         return;
       }
       try {
-        const response = await api.get('/bookings', {
+        const response = await api.get('/api/bookings', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBookings(response.data);
@@ -52,7 +52,7 @@ const UserBookings = () => {
     setSuccess('');
     const token = localStorage.getItem('token');
     try {
-      await api.delete(`/bookings/${bookingId}`, {
+      await api.delete(`/api/bookings/${bookingId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBookings((prev) => prev.filter((b) => b._id !== bookingId));

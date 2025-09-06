@@ -76,6 +76,10 @@ exports.deleteTour = async (req, res) => {
     if (!tour) return res.status(404).json({ msg: 'Tour not found' });
 
     // Optional: check if req.user.userId equals tour.createdBy for authorization
+    if (tour.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json({ msg: 'Access denied: You can only delete your own tours' });
+    }
+    console.log("Deleting tour:", tour);
 
     await tour.remove();
     res.json({ msg: 'Tour deleted' });

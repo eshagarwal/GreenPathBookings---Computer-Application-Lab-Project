@@ -6,8 +6,7 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import TourDetails from './pages/TourDetails';
 import UserBookings from './pages/UserBookings';
-
-
+import BookingForm from './pages/BookingFormPage';
 
 function App() {
   return (
@@ -19,6 +18,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tours/:id" element={<TourDetails />} />
         <Route path="/bookings" element={<UserBookings />} />
+        <Route path="/book/:tourId" element={<BookingForm />} />
 
       </Routes>
     </Router>

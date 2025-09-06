@@ -1,22 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  Container, Typography, Box, CircularProgress, Card, CardMedia,
-  CardContent, Button, TextField, Alert
-} from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+  Container,
+  Typography,
+  Box,
+  CircularProgress,
+  Card,
+  CardMedia,
+  CardContent,
+  Button,
+  TextField,
+  Alert,
+} from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const TourDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Booking state
   const [participants, setParticipants] = useState(1);
-  const [bookingError, setBookingError] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState('');
+  const [bookingError, setBookingError] = useState("");
+  const [bookingSuccess, setBookingSuccess] = useState("");
 
   useEffect(() => {
     const fetchTour = async () => {
@@ -25,7 +33,7 @@ const TourDetails = () => {
         setTour(response.data);
         setLoading(false);
       } catch (err) {
-        setError('Failed to load tour details');
+        setError("Failed to load tour details");
         setLoading(false);
       }
     };
@@ -33,32 +41,37 @@ const TourDetails = () => {
   }, [id]);
 
   const handleBooking = async () => {
-    setBookingError('');
-    setBookingSuccess('');
+    setBookingError("");
+    setBookingSuccess("");
     // Assume JWT token is stored in localStorage
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      setBookingError('You need to be logged in to book a tour.');
+      setBookingError("You need to be logged in to book a tour.");
       return;
     }
 
     try {
-      const response = await api.post('/bookings', {
-        tourId: id,
-        numberOfSpots: participants,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await api.post(
+        "/bookings",
+        {
+          tourId: id,
+          numberOfSpots: participants,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      setBookingSuccess('Booking successful! Thank you for your reservation.');
+      setBookingSuccess("Booking successful! Thank you for your reservation.");
     } catch (err) {
-      setBookingError(err.response?.data?.msg || 'Booking failed');
+      setBookingError(err.response?.data?.msg || "Booking failed");
     }
   };
 
-  if (loading) return <CircularProgress sx={{ mt: 4, display: 'block', mx: 'auto' }} />;
+  if (loading)
+    return <CircularProgress sx={{ mt: 4, display: "block", mx: "auto" }} />;
 
   if (error)
     return (
@@ -79,7 +92,12 @@ const TourDetails = () => {
       </Button>
       <Card>
         {tour.images && tour.images.length > 0 && (
-          <CardMedia component="img" height="400" image={tour.images[0]} alt={tour.title} />
+          <CardMedia
+            component="img"
+            height="400"
+            image={tour.images[0]}
+            alt={tour.title}
+          />
         )}
         <CardContent>
           <Typography variant="h4" gutterBottom>
@@ -100,16 +118,31 @@ const TourDetails = () => {
               label="Number of Participants"
               type="number"
               value={participants}
-              onChange={(e) => setParticipants(Math.max(1, Number(e.target.value)))}
+              onChange={(e) =>
+                setParticipants(Math.max(1, Number(e.target.value)))
+              }
               inputProps={{ min: 1 }}
               sx={{ width: 200 }}
             />
           </Box>
 
-          {bookingError && <Alert severity="error" sx={{ mb: 2 }}>{bookingError}</Alert>}
-          {bookingSuccess && <Alert severity="success" sx={{ mb: 2 }}>{bookingSuccess}</Alert>}
+          {bookingError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {bookingError}
+            </Alert>
+          )}
+          {bookingSuccess && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {bookingSuccess}
+            </Alert>
+          )}
 
-          <Button variant="contained" color="primary" onClick={handleBooking}>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3 }}
+            onClick={() => navigate(`/book/${tour._id}`)} // navigate to booking form page
+          >
             Book This Tour
           </Button>
         </CardContent>
