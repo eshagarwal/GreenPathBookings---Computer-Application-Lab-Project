@@ -22,6 +22,12 @@ const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    if (user?.role.toLowerCase() === 'admin') {
+      navigate('/admin');
+    }
+  }, []);
+
   return (
     <Layout>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
