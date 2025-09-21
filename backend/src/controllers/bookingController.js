@@ -2,7 +2,7 @@ import prisma from '../utils/prisma.js';
 
 const createBooking = async (req, res) => {
   try {
-    const { tourId, numberOfPeople } = req.body;
+    const { tourId, numberOfPeople, paymentData } = req.body;
     const userId = req.user.id;
 
     // Verify tour exists and is active
@@ -40,13 +40,28 @@ const createBooking = async (req, res) => {
     // Calculate total price
     const totalPrice = tour.price * numberOfPeople;
 
+    // Validate payment data if provided
+    if (paymentData && paymentData.paymentStatus !== 'COMPLETED') {
+      return res.status(400).json({ error: 'Payment was not completed successfully' });
+    }
+
+    const bookingData = {
+      userId,
+      tourId: parseInt(tourId),
+      numberOfPeople: parseInt(numberOfPeople),
+      totalPrice,
+      status: paymentData ? 'CONFIRMED' : 'PENDING', // Auto-confirm if payment is provided
+    };
+
+    // Add payment information if provided
+    if (paymentData) {
+      bookingData.paymentId = paymentData.paymentId;
+      bookingData.paymentStatus = paymentData.paymentStatus;
+      bookingData.paymentMethod = paymentData.paymentMethod;
+    }
+
     const booking = await prisma.booking.create({
-      data: {
-        userId,
-        tourId: parseInt(tourId),
-        numberOfPeople: parseInt(numberOfPeople),
-        totalPrice
-      },
+      data: bookingData,
       include: {
         user: {
           select: {

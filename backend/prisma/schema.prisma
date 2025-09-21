@@ -48,6 +48,9 @@ model Booking {
   numberOfPeople Int       @default(1)
   totalPrice  Float
   status      BookingStatus @default(PENDING)
+  paymentId   String?       // PayPal payment ID
+  paymentStatus String?     // Payment status from PayPal
+  paymentMethod String?     // Payment method (e.g., "paypal")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 import theme from './theme';
 import { AuthProvider } from './contexts/AuthContext';
@@ -17,10 +18,17 @@ import Tours from './pages/Tours';
 import MyBookings from './pages/MyBookings';
 
 function App() {
+  const paypalOptions = {
+    "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,
+    currency: "USD",
+    intent: "capture",
+  };
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
+    <PayPalScriptProvider options={paypalOptions}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
         <Router>
           <Routes>
             {/* Public routes - redirect if already authenticated */}
@@ -85,6 +93,7 @@ function App() {
         </Router>
       </AuthProvider>
     </ThemeProvider>
+    </PayPalScriptProvider>
   );
 }
 

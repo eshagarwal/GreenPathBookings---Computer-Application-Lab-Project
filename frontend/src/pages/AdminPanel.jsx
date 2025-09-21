@@ -72,6 +72,8 @@ const AdminPanel = () => {
   const [editingTour, setEditingTour] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [bookingUpdateLoading, setBookingUpdateLoading] = useState({});
+  const [bookingDetailsDialog, setBookingDetailsDialog] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [tourForm, setTourForm] = useState({
     title: '',
     description: '',
@@ -268,6 +270,16 @@ const AdminPanel = () => {
       default:
         return 'default';
     }
+  };
+
+  const handleViewBookingDetails = (booking) => {
+    setSelectedBooking(booking);
+    setBookingDetailsDialog(true);
+  };
+
+  const handleCloseBookingDetails = () => {
+    setBookingDetailsDialog(false);
+    setSelectedBooking(null);
   };
 
   return (
@@ -541,7 +553,10 @@ const AdminPanel = () => {
                               </Tooltip>
                             )}
                             <Tooltip title="View Details">
-                              <IconButton size="small">
+                              <IconButton 
+                                size="small"
+                                onClick={() => handleViewBookingDetails(booking)}
+                              >
                                 <Visibility />
                               </IconButton>
                             </Tooltip>
@@ -664,6 +679,149 @@ const AdminPanel = () => {
               disabled={!tourForm.title || !tourForm.description || !tourForm.destination || !tourForm.price || !tourForm.duration || !tourForm.maxCapacity || !tourForm.startDate || !tourForm.endDate}
             >
               {editingTour ? 'Update' : 'Create'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Booking Details Dialog */}
+        <Dialog open={bookingDetailsDialog} onClose={handleCloseBookingDetails} maxWidth="md" fullWidth>
+          <DialogTitle>
+            Booking Details - #{selectedBooking?.id}
+          </DialogTitle>
+          <DialogContent>
+            {selectedBooking && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
+                {/* Customer Information */}
+                <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                  <Typography variant="h6" gutterBottom>
+                    Customer Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Name</Typography>
+                      <Typography variant="body1">
+                        {selectedBooking.user.firstName} {selectedBooking.user.lastName}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Email</Typography>
+                      <Typography variant="body1">{selectedBooking.user.email}</Typography>
+                    </Grid>
+                  </Grid>
+                </Paper>
+
+                {/* Tour Information */}
+                <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                  <Typography variant="h6" gutterBottom>
+                    Tour Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12 }}>
+                      <Typography variant="body2" color="text.secondary">Tour Title</Typography>
+                      <Typography variant="body1">{selectedBooking.tour?.title || 'N/A'}</Typography>
+                    </Grid>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Destination</Typography>
+                      <Typography variant="body1">{selectedBooking.tour?.destination || 'N/A'}</Typography>
+                    </Grid>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Duration</Typography>
+                      <Typography variant="body1">{selectedBooking.tour?.duration || 'N/A'} days</Typography>
+                    </Grid>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Tour Dates</Typography>
+                      <Typography variant="body1">
+                        {selectedBooking.tour?.startDate ? new Date(selectedBooking.tour.startDate).toLocaleDateString() : 'N/A'} - {selectedBooking.tour?.endDate ? new Date(selectedBooking.tour.endDate).toLocaleDateString() : 'N/A'}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Paper>
+
+                {/* Booking Details */}
+                <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                  <Typography variant="h6" gutterBottom>
+                    Booking Details
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Number of People</Typography>
+                      <Typography variant="body1">{selectedBooking.numberOfPeople}</Typography>
+                    </Grid>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Total Price</Typography>
+                      <Typography variant="body1" color="primary.main" fontWeight="bold">
+                        ${selectedBooking.totalPrice}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Status</Typography>
+                      <Chip
+                        label={selectedBooking.status}
+                        color={getStatusColor(selectedBooking.status)}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 6 }}>
+                      <Typography variant="body2" color="text.secondary">Booking Date</Typography>
+                      <Typography variant="body1">
+                        {new Date(selectedBooking.createdAt).toLocaleDateString()} at {new Date(selectedBooking.createdAt).toLocaleTimeString()}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Paper>
+
+                {/* Payment Information */}
+                {(selectedBooking.paymentId || selectedBooking.paymentStatus || selectedBooking.paymentMethod) && (
+                  <Paper sx={{ p: 2, bgcolor: 'success.50', border: 1, borderColor: 'success.200' }}>
+                    <Typography variant="h6" gutterBottom color="success.dark">
+                      Payment Information
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {selectedBooking.paymentId && (
+                        <Grid size={{ xs: 12 }}>
+                          <Typography variant="body2" color="text.secondary">Payment ID</Typography>
+                          <Typography variant="body1" fontFamily="monospace">
+                            {selectedBooking.paymentId}
+                          </Typography>
+                        </Grid>
+                      )}
+                      {selectedBooking.paymentMethod && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Payment Method</Typography>
+                          <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
+                            {selectedBooking.paymentMethod}
+                          </Typography>
+                        </Grid>
+                      )}
+                      {selectedBooking.paymentStatus && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Payment Status</Typography>
+                          <Chip
+                            label={selectedBooking.paymentStatus}
+                            color={selectedBooking.paymentStatus === 'COMPLETED' ? 'success' : 'warning'}
+                            size="small"
+                          />
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Paper>
+                )}
+
+                {/* Tour Description */}
+                {selectedBooking.tour?.description && (
+                  <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Tour Description
+                    </Typography>
+                    <Typography variant="body1">{selectedBooking.tour.description}</Typography>
+                  </Paper>
+                )}
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseBookingDetails}>
+              Close
             </Button>
           </DialogActions>
         </Dialog>

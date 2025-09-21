@@ -33,6 +33,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
+import PayPalCheckout from '../components/PayPalCheckout';
 import { toursAPI, bookingAPI } from '../services/api';
 
 const Tours = () => {
@@ -44,6 +45,7 @@ const Tours = () => {
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -80,9 +82,10 @@ const Tours = () => {
     setBookingDialog(false);
     setSelectedTour(null);
     setNumberOfPeople(1);
+    setPaymentData(null);
   };
 
-  const handleConfirmBooking = async () => {
+  const handlePaymentSuccess = async (paymentDetails) => {
     if (!selectedTour) return;
 
     try {
@@ -90,10 +93,11 @@ const Tours = () => {
       const bookingData = {
         tourId: selectedTour.id,
         numberOfPeople: parseInt(numberOfPeople),
+        paymentData: paymentDetails,
       };
 
       await bookingAPI.createBooking(bookingData);
-      showSnackbar('Booking created successfully!');
+      showSnackbar('Booking created successfully! Payment confirmed.');
       handleCloseBookingDialog();
       // Refresh tours to update availability
       fetchTours();
@@ -104,6 +108,15 @@ const Tours = () => {
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  const handlePaymentError = (error) => {
+    console.error('Payment error:', error);
+    showSnackbar('Payment failed. Please try again.', 'error');
+  };
+
+  const handlePaymentCancel = () => {
+    showSnackbar('Payment was cancelled.', 'info');
   };
 
   const calculateTotalPrice = () => {
@@ -282,17 +295,23 @@ const Tours = () => {
               )}
             </Box>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseBookingDialog}>
-              Cancel
-            </Button>
+          <DialogActions sx={{ flexDirection: 'column', gap: 2, p: 3 }}>
+            <PayPalCheckout
+              amount={calculateTotalPrice()}
+              currency="USD"
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              onCancel={handlePaymentCancel}
+              disabled={!numberOfPeople || bookingLoading}
+              tourTitle={selectedTour?.title || ''}
+              numberOfPeople={numberOfPeople}
+            />
             <Button 
-              onClick={handleConfirmBooking} 
-              variant="contained"
-              disabled={bookingLoading || !numberOfPeople}
-              startIcon={bookingLoading && <CircularProgress size={20} />}
+              onClick={handleCloseBookingDialog}
+              variant="outlined"
+              fullWidth
             >
-              {bookingLoading ? 'Booking...' : 'Confirm Booking'}
+              Cancel
             </Button>
           </DialogActions>
         </Dialog>

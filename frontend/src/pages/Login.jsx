@@ -44,9 +44,14 @@ const Login = () => {
     }
 
     const result = await login(formData.email, formData.password);
+    console.log('Login result:', result);
     
     if (result.success) {
-      navigate(from, { replace: true });
+      if (result.user.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } else {
       setError(result.error);
     }
