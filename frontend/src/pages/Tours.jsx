@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -23,18 +23,20 @@ import {
   MenuItem,
   CircularProgress,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 import {
   LocationOn,
   Schedule,
   People,
   AttachMoney,
   CalendarToday,
-} from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
-import Layout from '../components/Layout';
-import PayPalCheckout from '../components/PayPalCheckout';
-import { toursAPI, bookingAPI } from '../services/api';
+  Search,
+  Clear,
+} from "@mui/icons-material";
+import { useAuth } from "../contexts/AuthContext";
+import Layout from "../components/Layout";
+import PayPalCheckout from "../components/PayPalCheckout";
+import { toursAPI, bookingAPI } from "../services/api";
 
 const Tours = () => {
   const { user } = useAuth();
@@ -43,11 +45,17 @@ const Tours = () => {
   const [selectedTour, setSelectedTour] = useState(null);
   const [bookingDialog, setBookingDialog] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState(1);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const [bookingLoading, setBookingLoading] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredTours, setFilteredTours] = useState([]);
 
-  const showSnackbar = (message, severity = 'success') => {
+  const showSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
 
@@ -60,12 +68,34 @@ const Tours = () => {
       setLoading(true);
       const data = await toursAPI.getAllTours(true); // Only active tours
       setTours(data);
+      setFilteredTours(data); // Initialize filtered tours
     } catch (error) {
-      console.error('Error fetching tours:', error);
-      showSnackbar('Failed to load tours', 'error');
+      console.error("Error fetching tours:", error);
+      showSnackbar("Failed to load tours", "error");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter tours based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredTours(tours);
+    } else {
+      const filtered = tours.filter((tour) => {
+        const query = searchQuery.toLowerCase();
+        return tour.title.toLowerCase().includes(query);
+      });
+      setFilteredTours(filtered);
+    }
+  }, [tours, searchQuery]);
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
   };
 
   useEffect(() => {
@@ -97,26 +127,26 @@ const Tours = () => {
       };
 
       await bookingAPI.createBooking(bookingData);
-      showSnackbar('Booking created successfully! Payment confirmed.');
+      showSnackbar("Booking created successfully! Payment confirmed.");
       handleCloseBookingDialog();
       // Refresh tours to update availability
       fetchTours();
     } catch (error) {
-      console.error('Error creating booking:', error);
-      const message = error.response?.data?.error || 'Failed to create booking';
-      showSnackbar(message, 'error');
+      console.error("Error creating booking:", error);
+      const message = error.response?.data?.error || "Failed to create booking";
+      showSnackbar(message, "error");
     } finally {
       setBookingLoading(false);
     }
   };
 
   const handlePaymentError = (error) => {
-    console.error('Payment error:', error);
-    showSnackbar('Payment failed. Please try again.', 'error');
+    console.error("Payment error:", error);
+    showSnackbar("Payment failed. Please try again.", "error");
   };
 
   const handlePaymentCancel = () => {
-    showSnackbar('Payment was cancelled.', 'info');
+    showSnackbar("Payment was cancelled.", "info");
   };
 
   const calculateTotalPrice = () => {
@@ -128,7 +158,12 @@ const Tours = () => {
     return (
       <Layout>
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight="50vh"
+          >
             <CircularProgress />
           </Box>
         </Container>
@@ -143,13 +178,45 @@ const Tours = () => {
           <Typography variant="h3" component="h1" gutterBottom>
             Available Tours
           </Typography>
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant="h6" color="text.secondary" gutterBottom>
             Discover sustainable travel experiences
           </Typography>
+
+          {/* Search Section */}
+          <Box sx={{ mt: 3, mb: 2 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Search tours by destination, title, or description..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <Search sx={{ mr: 1, color: "text.secondary" }} />
+                ),
+                endAdornment: searchQuery && (
+                  <Button
+                    onClick={handleClearSearch}
+                    size="small"
+                    sx={{ minWidth: "auto", p: 1 }}
+                  >
+                    <Clear sx={{ fontSize: 20 }} />
+                  </Button>
+                ),
+              }}
+              sx={{ maxWidth: 600 }}
+            />
+            {searchQuery && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {filteredTours.length} tour
+                {filteredTours.length !== 1 ? "s" : ""} found
+              </Typography>
+            )}
+          </Box>
         </Box>
 
         {tours.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Box sx={{ textAlign: "center", py: 8 }}>
             <Typography variant="h5" color="text.secondary" gutterBottom>
               No tours available at the moment
             </Typography>
@@ -157,22 +224,51 @@ const Tours = () => {
               Check back later for new eco-friendly travel options!
             </Typography>
           </Box>
+        ) : filteredTours.length === 0 && searchQuery ? (
+          <Box sx={{ textAlign: "center", py: 8 }}>
+            <Typography variant="h5" color="text.secondary" gutterBottom>
+              No tours found for "{searchQuery}"
+            </Typography>
+            <Typography variant="body1" color="text.secondary" gutterBottom>
+              Try adjusting your search terms or browse all available tours.
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={handleClearSearch}
+              sx={{ mt: 2 }}
+            >
+              Clear Search
+            </Button>
+          </Box>
         ) : (
           <Grid container spacing={4}>
-            {tours.map((tour) => (
+            {filteredTours.map((tour) => (
               <Grid size={{ xs: 12, md: 6, lg: 4 }} key={tour.id}>
-                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Card
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
                   {tour.imageUrl && (
                     <CardMedia
                       component="img"
                       height="250"
                       image={tour.imageUrl}
                       alt={tour.title}
-                      sx={{ objectFit: 'cover' }}
+                      sx={{ objectFit: "cover" }}
                     />
                   )}
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        mb: 2,
+                      }}
+                    >
                       <Typography variant="h5" component="h2" gutterBottom>
                         {tour.title}
                       </Typography>
@@ -184,22 +280,26 @@ const Tours = () => {
                       />
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <LocationOn sx={{ mr: 1, fontSize: 20, color: 'text.secondary' }} />
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      <LocationOn
+                        sx={{ mr: 1, fontSize: 20, color: "text.secondary" }}
+                      />
                       <Typography variant="body2" color="text.secondary">
                         {tour.destination}
                       </Typography>
                     </Box>
 
                     <Typography variant="body2" sx={{ mb: 2 }}>
-                      {tour.description.length > 120 
-                        ? `${tour.description.substring(0, 120)}...` 
+                      {tour.description.length > 120
+                        ? `${tour.description.substring(0, 120)}...`
                         : tour.description}
                     </Typography>
 
                     <Divider sx={{ my: 2 }} />
 
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                    <Box
+                      sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}
+                    >
                       <Chip
                         icon={<Schedule />}
                         label={`${tour.duration} days`}
@@ -211,18 +311,21 @@ const Tours = () => {
                         label={`${tour.availableSpots}/${tour.maxCapacity} spots`}
                         size="small"
                         variant="outlined"
-                        color={tour.availableSpots > 0 ? 'success' : 'error'}
+                        color={tour.availableSpots > 0 ? "success" : "error"}
                       />
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <CalendarToday sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      <CalendarToday
+                        sx={{ mr: 1, fontSize: 16, color: "text.secondary" }}
+                      />
                       <Typography variant="body2" color="text.secondary">
-                        {new Date(tour.startDate).toLocaleDateString()} - {new Date(tour.endDate).toLocaleDateString()}
+                        {new Date(tour.startDate).toLocaleDateString()} -{" "}
+                        {new Date(tour.endDate).toLocaleDateString()}
                       </Typography>
                     </Box>
                   </CardContent>
-                  
+
                   <CardActions sx={{ p: 2 }}>
                     <Button
                       variant="contained"
@@ -230,7 +333,7 @@ const Tours = () => {
                       onClick={() => handleBookTour(tour)}
                       disabled={tour.availableSpots === 0}
                     >
-                      {tour.availableSpots === 0 ? 'Fully Booked' : 'Book Now'}
+                      {tour.availableSpots === 0 ? "Fully Booked" : "Book Now"}
                     </Button>
                   </CardActions>
                 </Card>
@@ -240,19 +343,26 @@ const Tours = () => {
         )}
 
         {/* Booking Dialog */}
-        <Dialog open={bookingDialog} onClose={handleCloseBookingDialog} maxWidth="sm" fullWidth>
-          <DialogTitle>
-            Book Tour: {selectedTour?.title}
-          </DialogTitle>
+        <Dialog
+          open={bookingDialog}
+          onClose={handleCloseBookingDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Book Tour: {selectedTour?.title}</DialogTitle>
           <DialogContent>
             <Box sx={{ pt: 2 }}>
               {selectedTour && (
                 <>
                   <Alert severity="info" sx={{ mb: 3 }}>
-                    <strong>Tour Details:</strong><br />
-                    Destination: {selectedTour.destination}<br />
-                    Duration: {selectedTour.duration} days<br />
-                    Price per person: ${selectedTour.price}<br />
+                    <strong>Tour Details:</strong>
+                    <br />
+                    Destination: {selectedTour.destination}
+                    <br />
+                    Duration: {selectedTour.duration} days
+                    <br />
+                    Price per person: ${selectedTour.price}
+                    <br />
                     Available spots: {selectedTour.availableSpots}
                   </Alert>
 
@@ -263,28 +373,45 @@ const Tours = () => {
                       label="Number of People"
                       onChange={(e) => setNumberOfPeople(e.target.value)}
                     >
-                      {Array.from({ length: Math.min(selectedTour.availableSpots, 10) }, (_, i) => i + 1).map((num) => (
+                      {Array.from(
+                        { length: Math.min(selectedTour.availableSpots, 10) },
+                        (_, i) => i + 1
+                      ).map((num) => (
                         <MenuItem key={num} value={num}>
-                          {num} {num === 1 ? 'person' : 'people'}
+                          {num} {num === 1 ? "person" : "people"}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
 
-                  <Box sx={{ p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+                  <Box sx={{ p: 2, bgcolor: "grey.100", borderRadius: 1 }}>
                     <Typography variant="h6" gutterBottom>
                       Booking Summary
                     </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
                       <Typography>Price per person:</Typography>
                       <Typography>${selectedTour.price}</Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
                       <Typography>Number of people:</Typography>
                       <Typography>{numberOfPeople}</Typography>
                     </Box>
                     <Divider sx={{ my: 1 }} />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
                       <Typography variant="h6">Total:</Typography>
                       <Typography variant="h6" color="primary">
                         ${calculateTotalPrice()}
@@ -295,7 +422,7 @@ const Tours = () => {
               )}
             </Box>
           </DialogContent>
-          <DialogActions sx={{ flexDirection: 'column', gap: 2, p: 3 }}>
+          <DialogActions sx={{ flexDirection: "column", gap: 2, p: 3 }}>
             <PayPalCheckout
               amount={calculateTotalPrice()}
               currency="USD"
@@ -303,10 +430,10 @@ const Tours = () => {
               onError={handlePaymentError}
               onCancel={handlePaymentCancel}
               disabled={!numberOfPeople || bookingLoading}
-              tourTitle={selectedTour?.title || ''}
+              tourTitle={selectedTour?.title || ""}
               numberOfPeople={numberOfPeople}
             />
-            <Button 
+            <Button
               onClick={handleCloseBookingDialog}
               variant="outlined"
               fullWidth
@@ -321,9 +448,13 @@ const Tours = () => {
           open={snackbar.open}
           autoHideDuration={6000}
           onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         >
-          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
             {snackbar.message}
           </Alert>
         </Snackbar>
