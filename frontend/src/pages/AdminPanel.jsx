@@ -36,6 +36,7 @@ import {
   CardActions,
   CircularProgress,
 } from '@mui/material';
+import Plot from 'react-plotly.js';
 import {
   People,
   BookmarkBorder,
@@ -67,6 +68,7 @@ const AdminPanel = () => {
     activeTours: 0,
   });
   const [recentBookings, setRecentBookings] = useState([]);
+  const [allBookings, setAllBookings] = useState([]);
   const [tours, setTours] = useState([]);
   const [openTourDialog, setOpenTourDialog] = useState(false);
   const [editingTour, setEditingTour] = useState(null);
@@ -137,6 +139,7 @@ const AdminPanel = () => {
     try {
       const response = await api.get('/bookings');
       setRecentBookings(response.data.bookings.slice(0, 10)); // Show latest 10
+      setAllBookings(response.data.bookings); // Store all bookings for analytics
       
       // Calculate booking stats
       const totalBookings = response.data.bookings.length;
@@ -282,6 +285,96 @@ const AdminPanel = () => {
     setSelectedBooking(null);
   };
 
+  // Analytics Data Processing Functions
+  const getBookingTrendsData = () => {
+    if (!allBookings.length) return { dates: [], counts: [] };
+
+    // Group bookings by date
+    const bookingsByDate = {};
+    allBookings.forEach(booking => {
+      const date = new Date(booking.createdAt).toISOString().split('T')[0];
+      bookingsByDate[date] = (bookingsByDate[date] || 0) + 1;
+    });
+
+    // Sort dates and prepare data for chart
+    const sortedDates = Object.keys(bookingsByDate).sort();
+    const dates = sortedDates;
+    const counts = sortedDates.map(date => bookingsByDate[date]);
+
+    return { dates, counts };
+  };
+
+  const getRevenueData = () => {
+    if (!allBookings.length) return { dates: [], revenue: [] };
+
+    const revenueByDate = {};
+    allBookings
+      .filter(booking => booking.status === 'CONFIRMED' || booking.status === 'COMPLETED')
+      .forEach(booking => {
+        const date = new Date(booking.createdAt).toISOString().split('T')[0];
+        revenueByDate[date] = (revenueByDate[date] || 0) + parseFloat(booking.totalPrice);
+      });
+
+    const sortedDates = Object.keys(revenueByDate).sort();
+    const dates = sortedDates;
+    const revenue = sortedDates.map(date => revenueByDate[date]);
+
+    return { dates, revenue };
+  };
+
+  const getTourPopularityData = () => {
+    if (!allBookings.length || !tours.length) return { labels: [], values: [] };
+
+    const bookingsByTour = {};
+    allBookings.forEach(booking => {
+      if (booking.tour) {
+        const tourTitle = booking.tour.title;
+        bookingsByTour[tourTitle] = (bookingsByTour[tourTitle] || 0) + 1;
+      }
+    });
+
+    const labels = Object.keys(bookingsByTour);
+    const values = Object.values(bookingsByTour);
+
+    return { labels, values };
+  };
+
+  const getBookingStatusData = () => {
+    if (!allBookings.length) return { labels: [], values: [] };
+
+    const statusCounts = {};
+    allBookings.forEach(booking => {
+      statusCounts[booking.status] = (statusCounts[booking.status] || 0) + 1;
+    });
+
+    const labels = Object.keys(statusCounts);
+    const values = Object.values(statusCounts);
+
+    return { labels, values };
+  };
+
+  const getMonthlyRevenueData = () => {
+    if (!allBookings.length) return { months: [], revenue: [] };
+
+    const revenueByMonth = {};
+    allBookings
+      .filter(booking => booking.status === 'CONFIRMED' || booking.status === 'COMPLETED')
+      .forEach(booking => {
+        const date = new Date(booking.createdAt);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        revenueByMonth[monthKey] = (revenueByMonth[monthKey] || 0) + parseFloat(booking.totalPrice);
+      });
+
+    const sortedMonths = Object.keys(revenueByMonth).sort();
+    const months = sortedMonths.map(month => {
+      const [year, monthNum] = month.split('-');
+      return new Date(year, monthNum - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    });
+    const revenue = sortedMonths.map(month => revenueByMonth[month]);
+
+    return { months, revenue };
+  };
+
   return (
     <Layout>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -364,6 +457,7 @@ const AdminPanel = () => {
               <Tabs value={activeTab} onChange={handleTabChange} variant="fullWidth">
                 <Tab label="Tours Management" />
                 <Tab label="Bookings Overview" />
+                <Tab label="Analytics" />
               </Tabs>
             </Paper>
 
@@ -571,6 +665,273 @@ const AdminPanel = () => {
                   <Box sx={{ textAlign: 'center', py: 4 }}>
                     <Typography variant="body1" color="text.secondary">
                       No bookings found.
+                    </Typography>
+                  </Box>
+                )}
+              </Paper>
+            )}
+
+            {/* Analytics Tab */}
+            {activeTab === 2 && (
+              <Paper sx={{ p: 3 }}>
+                <Typography variant="h5" component="h2" gutterBottom>
+                  Analytics Dashboard
+                </Typography>
+                
+                <Grid container spacing={3}>
+                  {/* Booking Trends Chart */}
+                  <Grid size={{ xs: 12, lg: 6 }}>
+                    <Card sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Daily Booking Trends
+                        </Typography>
+                        <Box sx={{ height: 400 }}>
+                          <Plot
+                            data={[
+                              {
+                                x: getBookingTrendsData().dates,
+                                y: getBookingTrendsData().counts,
+                                type: 'scatter',
+                                mode: 'lines+markers',
+                                line: { color: '#1976d2', width: 3 },
+                                marker: { size: 8, color: '#1976d2' },
+                                name: 'Bookings',
+                              },
+                            ]}
+                            layout={{
+                              title: '',
+                              xaxis: { title: 'Date' },
+                              yaxis: { title: 'Number of Bookings' },
+                              margin: { l: 50, r: 50, t: 20, b: 50 },
+                              height: 350,
+                              showlegend: false,
+                            }}
+                            config={{ displayModeBar: false, responsive: true }}
+                            style={{ width: '100%', height: '100%' }}
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Revenue Trends Chart */}
+                  <Grid size={{ xs: 12, lg: 6 }}>
+                    <Card sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Daily Revenue Trends
+                        </Typography>
+                        <Box sx={{ height: 400 }}>
+                          <Plot
+                            data={[
+                              {
+                                x: getRevenueData().dates,
+                                y: getRevenueData().revenue,
+                                type: 'scatter',
+                                mode: 'lines+markers',
+                                line: { color: '#2e7d32', width: 3 },
+                                marker: { size: 8, color: '#2e7d32' },
+                                name: 'Revenue',
+                                fill: 'tozeroy',
+                                fillcolor: 'rgba(46, 125, 50, 0.1)',
+                              },
+                            ]}
+                            layout={{
+                              title: '',
+                              xaxis: { title: 'Date' },
+                              yaxis: { title: 'Revenue ($)' },
+                              margin: { l: 50, r: 50, t: 20, b: 50 },
+                              height: 350,
+                              showlegend: false,
+                            }}
+                            config={{ displayModeBar: false, responsive: true }}
+                            style={{ width: '100%', height: '100%' }}
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Tour Popularity Chart */}
+                  <Grid size={{ xs: 12, lg: 6 }}>
+                    <Card sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Tour Popularity
+                        </Typography>
+                        <Box sx={{ height: 400 }}>
+                          <Plot
+                            data={[
+                              {
+                                labels: getTourPopularityData().labels,
+                                values: getTourPopularityData().values,
+                                type: 'pie',
+                                textposition: 'inside',
+                                textinfo: 'label+percent',
+                                hole: 0.3,
+                                marker: {
+                                  colors: ['#1976d2', '#2e7d32', '#ed6c02', '#d32f2f', '#7b1fa2', '#c2185b'],
+                                },
+                              },
+                            ]}
+                            layout={{
+                              title: '',
+                              margin: { l: 20, r: 20, t: 20, b: 20 },
+                              height: 350,
+                              showlegend: true,
+                              legend: { x: 1, y: 0.5 },
+                            }}
+                            config={{ displayModeBar: false, responsive: true }}
+                            style={{ width: '100%', height: '100%' }}
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Booking Status Distribution */}
+                  <Grid size={{ xs: 12, lg: 6 }}>
+                    <Card sx={{ height: '100%' }}>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Booking Status Distribution
+                        </Typography>
+                        <Box sx={{ height: 400 }}>
+                          <Plot
+                            data={[
+                              {
+                                x: getBookingStatusData().labels,
+                                y: getBookingStatusData().values,
+                                type: 'bar',
+                                marker: {
+                                  color: getBookingStatusData().labels.map(status => {
+                                    switch (status) {
+                                      case 'PENDING': return '#ed6c02';
+                                      case 'CONFIRMED': return '#2e7d32';
+                                      case 'CANCELLED': return '#d32f2f';
+                                      case 'COMPLETED': return '#1976d2';
+                                      default: return '#9e9e9e';
+                                    }
+                                  }),
+                                },
+                              },
+                            ]}
+                            layout={{
+                              title: '',
+                              xaxis: { title: 'Status' },
+                              yaxis: { title: 'Number of Bookings' },
+                              margin: { l: 50, r: 50, t: 20, b: 50 },
+                              height: 350,
+                              showlegend: false,
+                            }}
+                            config={{ displayModeBar: false, responsive: true }}
+                            style={{ width: '100%', height: '100%' }}
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Monthly Revenue Chart */}
+                  <Grid size={{ xs: 12 }}>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Monthly Revenue Overview
+                        </Typography>
+                        <Box sx={{ height: 400 }}>
+                          <Plot
+                            data={[
+                              {
+                                x: getMonthlyRevenueData().months,
+                                y: getMonthlyRevenueData().revenue,
+                                type: 'bar',
+                                marker: {
+                                  color: '#1976d2',
+                                  opacity: 0.8,
+                                },
+                                name: 'Monthly Revenue',
+                              },
+                            ]}
+                            layout={{
+                              title: '',
+                              xaxis: { title: 'Month' },
+                              yaxis: { title: 'Revenue ($)' },
+                              margin: { l: 50, r: 50, t: 20, b: 80 },
+                              height: 350,
+                              showlegend: false,
+                              bargap: 0.3,
+                            }}
+                            config={{ displayModeBar: false, responsive: true }}
+                            style={{ width: '100%', height: '100%' }}
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Key Metrics Summary */}
+                  <Grid size={{ xs: 12 }}>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Key Performance Indicators
+                        </Typography>
+                        <Grid container spacing={2}>
+                          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'primary.50', borderRadius: 1 }}>
+                              <Typography variant="h4" color="primary.main">
+                                ${getRevenueData().revenue.reduce((sum, val) => sum + val, 0).toFixed(2)}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Total Revenue
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'success.50', borderRadius: 1 }}>
+                              <Typography variant="h4" color="success.main">
+                                ${allBookings.length ? (getRevenueData().revenue.reduce((sum, val) => sum + val, 0) / allBookings.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED').length || 0).toFixed(2) : '0.00'}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Average Booking Value
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'warning.50', borderRadius: 1 }}>
+                              <Typography variant="h4" color="warning.main">
+                                {allBookings.length ? ((allBookings.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED').length / allBookings.length) * 100).toFixed(1) : '0.0'}%
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Conversion Rate
+                              </Typography>
+                            </Box>
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'info.50', borderRadius: 1 }}>
+                              <Typography variant="h4" color="info.main">
+                                {tours.filter(t => t.isActive).length}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Active Tours
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+
+                {allBookings.length === 0 && (
+                  <Box sx={{ textAlign: 'center', py: 8 }}>
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No Analytics Data Available
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Start getting bookings to see analytics and insights here.
                     </Typography>
                   </Box>
                 )}
