@@ -44,6 +44,7 @@ const Tours = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTour, setSelectedTour] = useState(null);
   const [bookingDialog, setBookingDialog] = useState(false);
+  const [detailsDialog, setDetailsDialog] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -106,6 +107,16 @@ const Tours = () => {
     setSelectedTour(tour);
     setNumberOfPeople(1);
     setBookingDialog(true);
+  };
+
+  const handleShowTourDetails = (tour) => {
+    setSelectedTour(tour);
+    setDetailsDialog(true);
+  };
+
+  const handleCloseDetailsDialog = () => {
+    setDetailsDialog(false);
+    setSelectedTour(null);
   };
 
   const handleCloseBookingDialog = () => {
@@ -249,7 +260,14 @@ const Tours = () => {
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease-in-out",
+                    "&:hover": {
+                      transform: "translateY(-8px)",
+                      boxShadow: "0 12px 20px rgba(0, 0, 0, 0.15)",
+                    },
                   }}
+                  onClick={() => handleShowTourDetails(tour)}
                 >
                   {tour.imageUrl && (
                     <CardMedia
@@ -330,7 +348,10 @@ const Tours = () => {
                     <Button
                       variant="contained"
                       fullWidth
-                      onClick={() => handleBookTour(tour)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookTour(tour);
+                      }}
                       disabled={tour.availableSpots === 0}
                     >
                       {tour.availableSpots === 0 ? "Fully Booked" : "Book Now"}
@@ -440,6 +461,176 @@ const Tours = () => {
             >
               Cancel
             </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Tour Details Dialog */}
+        <Dialog
+          open={detailsDialog}
+          onClose={handleCloseDetailsDialog}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle sx={{ pb: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
+                {selectedTour?.title}
+              </Typography>
+              <Chip
+                label={`$${selectedTour?.price} per person`}
+                color="primary"
+                icon={<AttachMoney />}
+              />
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            {selectedTour && (
+              <Box sx={{ py: 1 }}>
+                {/* Tour Image */}
+                {selectedTour.imageUrl && (
+                  <Box sx={{ mb: 3 }}>
+                    <img
+                      src={selectedTour.imageUrl}
+                      alt={selectedTour.title}
+                      style={{
+                        width: "100%",
+                        height: "300px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                      }}
+                    />
+                  </Box>
+                )}
+
+                {/* Basic Information */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Tour Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                        <LocationOn sx={{ mr: 1, color: "primary.main" }} />
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Destination
+                          </Typography>
+                          <Typography variant="body1">
+                            {selectedTour.destination}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                        <Schedule sx={{ mr: 1, color: "primary.main" }} />
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Duration
+                          </Typography>
+                          <Typography variant="body1">
+                            {selectedTour.duration} days
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                        <CalendarToday sx={{ mr: 1, color: "primary.main" }} />
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Tour Dates
+                          </Typography>
+                          <Typography variant="body1">
+                            {new Date(selectedTour.startDate).toLocaleDateString()} - {new Date(selectedTour.endDate).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                        <People sx={{ mr: 1, color: "primary.main" }} />
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Availability
+                          </Typography>
+                          <Typography 
+                            variant="body1"
+                            color={selectedTour.availableSpots > 0 ? "success.main" : "error.main"}
+                          >
+                            {selectedTour.availableSpots} of {selectedTour.maxCapacity} spots available
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                <Divider sx={{ my: 3 }} />
+
+                {/* Description */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    About This Tour
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {selectedTour.description}
+                  </Typography>
+                </Box>
+
+                {/* Sustainability Features */}
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Eco-Friendly Features
+                  </Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    <Chip label="Carbon Neutral Transportation" variant="outlined" color="success" size="small" />
+                    <Chip label="Local Community Support" variant="outlined" color="success" size="small" />
+                    <Chip label="Sustainable Accommodation" variant="outlined" color="success" size="small" />
+                    <Chip label="Wildlife Conservation" variant="outlined" color="success" size="small" />
+                    <Chip label="Zero Waste Policy" variant="outlined" color="success" size="small" />
+                  </Box>
+                </Box>
+
+                {/* Pricing Information */}
+                <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Pricing
+                  </Typography>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Typography variant="body1">
+                      Price per person:
+                    </Typography>
+                    <Typography variant="h5" color="primary.main" fontWeight="bold">
+                      ${selectedTour.price}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Includes accommodation, meals, guided tours, and transportation
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 3 }}>
+            <Button
+              onClick={handleCloseDetailsDialog}
+              variant="outlined"
+              sx={{ mr: 2 }}
+            >
+              Close
+            </Button>
+            {selectedTour && selectedTour.availableSpots > 0 && (
+              <Button
+                variant="contained"
+                onClick={() => {
+                  handleCloseDetailsDialog();
+                  handleBookTour(selectedTour);
+                }}
+              >
+                Book This Tour
+              </Button>
+            )}
           </DialogActions>
         </Dialog>
 
