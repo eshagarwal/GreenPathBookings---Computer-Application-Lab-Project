@@ -99,6 +99,34 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      const response = await authAPI.editProfile(profileData);
+      
+      // Update user state
+      const updatedUser = response.user;
+      setUser(updatedUser);
+      
+      // Update localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return { success: true, user: updatedUser };
+    } catch (error) {
+      const message = error.response?.data?.error || 'Failed to update profile';
+      return { success: false, error: message };
+    }
+  };
+
+  const changePassword = async (passwordData) => {
+    try {
+      const response = await authAPI.changePassword(passwordData);
+      return { success: true, message: response.message };
+    } catch (error) {
+      const message = error.response?.data?.error || 'Failed to change password';
+      return { success: false, error: message };
+    }
+  };
+
   const isAdmin = () => {
     return user?.role === 'ADMIN';
   };
@@ -110,6 +138,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateProfile,
+    changePassword,
     isAdmin,
   };
 
