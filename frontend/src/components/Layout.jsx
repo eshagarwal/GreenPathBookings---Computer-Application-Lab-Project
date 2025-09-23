@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -10,9 +10,9 @@ import {
   Menu,
   MenuItem,
   Avatar,
-} from '@mui/material';
-import { AccountCircle, AdminPanelSettings } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
+} from "@mui/material";
+import { AccountCircle, AdminPanelSettings } from "@mui/icons-material";
+import { useAuth } from "../contexts/AuthContext";
 
 const Layout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
@@ -29,12 +29,12 @@ const Layout = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
     handleClose();
   };
 
   const handleAdminPanel = () => {
-    navigate('/admin');
+    navigate("/admin");
     handleClose();
   };
 
@@ -42,26 +42,40 @@ const Layout = ({ children }) => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography
-            variant="h6"
+          <Box
             component="a"
             href="/home"
             sx={{
               flexGrow: 1,
-              textDecoration: 'none',
-              color: 'inherit',
-              cursor: 'pointer'
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
             }}
           >
-            GreenPath Bookings
-          </Typography>
-          
+            <img
+              src="/apple-touch-icon.png"
+              alt="GreenPath Logo"
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                boxShadow: "0 0 5px rgba(0, 0, 0, 0.3)",
+              }}
+            />
+            <Typography variant="h6" component="span">
+              GreenPath Bookings
+            </Typography>
+          </Box>
+
           {user && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Typography variant="body2">
                 Welcome, {user.firstName}!
               </Typography>
-              
+
               <IconButton
                 size="large"
                 aria-label="account of current user"
@@ -74,18 +88,18 @@ const Layout = ({ children }) => {
                   <AccountCircle />
                 </Avatar>
               </IconButton>
-              
+
               <Menu
                 id="menu-appbar"
                 anchorEl={anchorEl}
                 anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: "top",
+                  horizontal: "right",
                 }}
                 keepMounted
                 transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
+                  vertical: "top",
+                  horizontal: "right",
                 }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
@@ -102,10 +116,8 @@ const Layout = ({ children }) => {
           )}
         </Toolbar>
       </AppBar>
-      
-      <main>
-        {children}
-      </main>
+
+      <main>{children}</main>
     </Box>
   );
 };
