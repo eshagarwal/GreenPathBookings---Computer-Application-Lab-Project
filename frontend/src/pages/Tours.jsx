@@ -23,6 +23,7 @@ import {
   MenuItem,
   CircularProgress,
   Divider,
+  Link,
 } from "@mui/material";
 import {
   LocationOn,
@@ -509,7 +510,9 @@ const Tours = () => {
                   </Typography>
                   <Grid container spacing={2}>
                     <Grid size={{ xs: 12, sm: 6 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                      >
                         <LocationOn sx={{ mr: 1, color: "primary.main" }} />
                         <Box>
                           <Typography variant="body2" color="text.secondary">
@@ -522,7 +525,9 @@ const Tours = () => {
                       </Box>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                      >
                         <Schedule sx={{ mr: 1, color: "primary.main" }} />
                         <Box>
                           <Typography variant="body2" color="text.secondary">
@@ -535,30 +540,45 @@ const Tours = () => {
                       </Box>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                      >
                         <CalendarToday sx={{ mr: 1, color: "primary.main" }} />
                         <Box>
                           <Typography variant="body2" color="text.secondary">
                             Tour Dates
                           </Typography>
                           <Typography variant="body1">
-                            {new Date(selectedTour.startDate).toLocaleDateString()} - {new Date(selectedTour.endDate).toLocaleDateString()}
+                            {new Date(
+                              selectedTour.startDate
+                            ).toLocaleDateString()}{" "}
+                            -{" "}
+                            {new Date(
+                              selectedTour.endDate
+                            ).toLocaleDateString()}
                           </Typography>
                         </Box>
                       </Box>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                      >
                         <People sx={{ mr: 1, color: "primary.main" }} />
                         <Box>
                           <Typography variant="body2" color="text.secondary">
                             Availability
                           </Typography>
-                          <Typography 
+                          <Typography
                             variant="body1"
-                            color={selectedTour.availableSpots > 0 ? "success.main" : "error.main"}
+                            color={
+                              selectedTour.availableSpots > 0
+                                ? "success.main"
+                                : "error.main"
+                            }
                           >
-                            {selectedTour.availableSpots} of {selectedTour.maxCapacity} spots available
+                            {selectedTour.availableSpots} of{" "}
+                            {selectedTour.maxCapacity} spots available
                           </Typography>
                         </Box>
                       </Box>
@@ -584,11 +604,36 @@ const Tours = () => {
                     Eco-Friendly Features
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                    <Chip label="Carbon Neutral Transportation" variant="outlined" color="success" size="small" />
-                    <Chip label="Local Community Support" variant="outlined" color="success" size="small" />
-                    <Chip label="Sustainable Accommodation" variant="outlined" color="success" size="small" />
-                    <Chip label="Wildlife Conservation" variant="outlined" color="success" size="small" />
-                    <Chip label="Zero Waste Policy" variant="outlined" color="success" size="small" />
+                    <Chip
+                      label="Carbon Neutral Transportation"
+                      variant="outlined"
+                      color="success"
+                      size="small"
+                    />
+                    <Chip
+                      label="Local Community Support"
+                      variant="outlined"
+                      color="success"
+                      size="small"
+                    />
+                    <Chip
+                      label="Sustainable Accommodation"
+                      variant="outlined"
+                      color="success"
+                      size="small"
+                    />
+                    <Chip
+                      label="Wildlife Conservation"
+                      variant="outlined"
+                      color="success"
+                      size="small"
+                    />
+                    <Chip
+                      label="Zero Waste Policy"
+                      variant="outlined"
+                      color="success"
+                      size="small"
+                    />
                   </Box>
                 </Box>
 
@@ -597,16 +642,29 @@ const Tours = () => {
                   <Typography variant="h6" gutterBottom>
                     Pricing
                   </Typography>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography variant="body1">
-                      Price per person:
-                    </Typography>
-                    <Typography variant="h5" color="primary.main" fontWeight="bold">
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="body1">Price per person:</Typography>
+                    <Typography
+                      variant="h5"
+                      color="primary.main"
+                      fontWeight="bold"
+                    >
                       ${selectedTour.price}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    Includes accommodation, meals, guided tours, and transportation
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
+                    Includes accommodation, meals, guided tours, and
+                    transportation
                   </Typography>
                 </Box>
               </Box>
@@ -645,6 +703,11 @@ const Tours = () => {
             onClose={handleCloseSnackbar}
             severity={snackbar.severity}
             sx={{ width: "100%" }}
+            action={
+              <Link href="/my-bookings" color="inherit" underline="always">
+                View My Bookings
+              </Link>
+            }
           >
             {snackbar.message}
           </Alert>
