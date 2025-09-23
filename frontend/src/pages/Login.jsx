@@ -14,11 +14,14 @@ import {
   Card,
   CardContent,
   Chip,
+  IconButton,
 } from "@mui/material";
 import {
   FlightTakeoffOutlined,
   LocationOnOutlined,
   StarOutlined,
+  VisibilityOffOutlined,
+  VisibilityOutlined,
 } from "@mui/icons-material";
 import EnergySavingsLeafTwoToneIcon from "@mui/icons-material/EnergySavingsLeafTwoTone";
 import { useAuth } from "../contexts/AuthContext";
@@ -33,6 +36,7 @@ const Login = () => {
     password: "",
   });
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const from = location.state?.from?.pathname || "/";
 
@@ -314,12 +318,27 @@ const Login = () => {
                 fullWidth
                 name="password"
                 label="Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
                 disabled={loading}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <VisibilityOutlined />
+                        ) : (
+                          <VisibilityOffOutlined />
+                        )}
+                      </IconButton>
+                    ),
+                  },
+                }}
               />
               <Button
                 type="submit"

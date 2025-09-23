@@ -12,12 +12,15 @@ import {
   CircularProgress,
   Grid,
   Chip,
+  IconButton
 } from "@mui/material";
 import {
   StarOutlined,
   CheckCircleOutlined,
   SecurityOutlined,
   SupportAgentOutlined,
+  VisibilityOffOutlined,
+  VisibilityOutlined,
 } from "@mui/icons-material";
 import EnergySavingsLeafTwoToneIcon from "@mui/icons-material/EnergySavingsLeafTwoTone";
 import { useAuth } from "../contexts/AuthContext";
@@ -34,6 +37,7 @@ const Register = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -358,13 +362,28 @@ const Register = () => {
                     fullWidth
                     name="password"
                     label="Password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     id="password"
                     autoComplete="new-password"
                     value={formData.password}
                     onChange={handleChange}
                     disabled={loading}
                     helperText="Minimum 6 characters"
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <VisibilityOutlined />
+                            ) : (
+                              <VisibilityOffOutlined />
+                            )}
+                          </IconButton>
+                        ),
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
@@ -373,11 +392,26 @@ const Register = () => {
                     fullWidth
                     name="confirmPassword"
                     label="Confirm Password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     id="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     disabled={loading}
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <VisibilityOutlined />
+                            ) : (
+                              <VisibilityOffOutlined />
+                            )}
+                          </IconButton>
+                        ),
+                      },
+                    }}
                   />
                 </Grid>
               </Grid>
