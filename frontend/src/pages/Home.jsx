@@ -59,6 +59,7 @@ const Home = () => {
   const [showPassword, setShowPassword] = useState({
     current: false,
     newPassword: false,
+    confirmPassword: false,
   });
 
   // Update form when user changes
@@ -179,6 +180,7 @@ const Home = () => {
       newPassword: "",
       confirmPassword: "",
     });
+    setShowPassword({ current: false, newPassword: false, confirmPassword: false });
     setPasswordMessage({ type: "", text: "" });
   };
 
@@ -401,14 +403,15 @@ const Home = () => {
                       setShowPassword({
                         current: !showPassword.current,
                         newPassword: showPassword.newPassword,
+                        confirmPassword: showPassword.confirmPassword,
                       })
                     }
                     edge="end"
                   >
                     {showPassword.current ? (
-                      <VisibilityOffOutlined />
-                    ) : (
                       <VisibilityOutlined />
+                    ) : (
+                      <VisibilityOffOutlined />
                     )}
                   </IconButton>
                 ),
@@ -431,14 +434,15 @@ const Home = () => {
                       setShowPassword({
                         current: showPassword.current,
                         newPassword: !showPassword.newPassword,
+                        confirmPassword: showPassword.confirmPassword,
                       })
                     }
                     edge="end"
                   >
                     {showPassword.newPassword ? (
-                      <VisibilityOffOutlined />
-                    ) : (
                       <VisibilityOutlined />
+                    ) : (
+                      <VisibilityOffOutlined />
                     )}
                   </IconButton>
                 ),
@@ -467,9 +471,9 @@ const Home = () => {
                     edge="end"
                   >
                     {showPassword.confirmPassword ? (
-                      <VisibilityOffOutlined />
-                    ) : (
                       <VisibilityOutlined />
+                    ) : (
+                      <VisibilityOffOutlined />
                     )}
                   </IconButton>
                 ),
